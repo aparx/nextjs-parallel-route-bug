@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+A potential issue with NextJS 14's parallel routes.
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Anatomy of the routes 
+```
+app/
+  dashboard/
+    default.tsx
+    layout.tsx
+    
+    @documents/
+      [teamId]/
+        page.tsx
+      layout.tsx
+      page.tsx
+      
+    @inspector/
+      [teamId]/
+        page.tsx
+        layout.tsx
+      default.tsx
+      
+    @sideboard/
+      [teamId]/
+        page.tsx
+      layout.tsx
+      page.tsx
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+In this tree, `default.tsx` always returns `null`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What is the issue?
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+When navigating to `/dashboard` the page looks like this:
 
-## Learn More
+![img.png](readme/dashboard.png)
 
-To learn more about Next.js, take a look at the following resources:
+When following is expected:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+![img.png](readme/expected.png)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+The layout `dashboard/@documents/layout.tsx` is not applied when no `teamId` is given.
+Only when that identifier is given as a dynamic route segment, the layout is actually 
+applied:
 
-## Deploy on Vercel
+![img.png](readme/dashboard_teamId.png)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Is this nominal?
+This behaviour seems not to be what it is supposed to be, since our `@sideboard` 
+layout is behaving like it should, even tho this route has basically the equivalent 
+anatomy to our `@documents` route.
